@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#151412">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="หุ้นของฉัน">
+<title>หุ้นของฉัน</title>
+<style>
+:root{--bg:#f6f4ef;--panel:#fff;--fg:#1d1b18;--muted:#6b665d;--line:#e3ded3;--accent:#2f5d50;--accent-fg:#fff;--ok:#2f7d4f;--bad:#b3412f;--warn:#9a6b12}
+@media (prefers-color-scheme:dark){:root{--bg:#151412;--panel:#1f1d1a;--fg:#eeeae2;--muted:#a29c91;--line:#34312c;--accent:#7fb8a6;--accent-fg:#10201b;--ok:#7cc79a;--bad:#ec8a77;--warn:#e0b15a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:"IBM Plex Sans Thai","Noto Sans Thai",system-ui,sans-serif;padding:16px 16px 40px}
+main{max-width:1100px;margin:0 auto}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+h1{font-size:26px;margin:4px 0}
+.muted{color:var(--muted);font-size:13px}
+.btns{display:flex;gap:8px;align-items:center}
+button{border:0;border-radius:12px;padding:12px 16px;font-size:15px;font-weight:600;font-family:inherit;background:var(--accent);color:var(--accent-fg);cursor:pointer}
+button.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+button:disabled{opacity:.5}
+#status{font-size:13px;margin:8px 0;min-height:18px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:12px 0;font-size:14px;line-height:1.65}
+.box b{font-weight:600}
+h2{font-size:13px;letter-spacing:.04em;color:var(--muted);text-transform:uppercase;margin:24px 0 10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.top{display:flex;justify-content:space-between;gap:8px}
+.tk{font-weight:700;font-size:18px}.nm{color:var(--muted);font-size:12px}
+.px{font-size:24px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.pd{font-size:12px;text-align:right;color:var(--muted)}
+.up{color:var(--ok)}.down{color:var(--bad)}.flat{color:var(--warn)}
+.chip{display:inline-block;font-size:12px;padding:1px 8px;border-radius:999px;border:1px solid currentColor;margin-right:4px}
+.lv{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;font-size:12px;text-align:center;font-variant-numeric:tabular-nums}
+.lv span{display:block;color:var(--muted);font-size:10px}
+.lv .s{color:var(--ok)}.lv .r{color:var(--bad)}
+.bar{position:relative;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--ok),var(--line) 50%,var(--bad))}
+.dot{position:absolute;top:-4px;width:4px;height:16px;border-radius:2px;background:var(--fg);transform:translateX(-2px)}
+.card p{margin:0;font-size:13px;line-height:1.55}
+.lab{display:block;font-size:11px;font-weight:600;color:var(--muted)}
+.act{border-top:1px dashed var(--line);padding-top:8px}
+.foot{font-size:12px;color:var(--muted);line-height:1.6;margin-top:24px}
+.foot a{color:var(--muted)}
+dialog{border:1px solid var(--line);border-radius:16px;background:var(--panel);color:var(--fg);max-width:420px;width:calc(100% - 32px)}
+dialog input{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font-size:14px;margin:6px 0 12px}
+dialog label{font-size:13px}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div><h1 id="title">หุ้นของฉัน</h1><div class="muted" id="updated">กำลังโหลด…</div></div>
+    <div class="btns"><button id="run">🔄 อัปเดตตอนนี้</button><button class="ghost" id="settings" aria-label="ตั้งค่า">⚙︎</button></div>
+  </header>
+  <div id="status"></div>
+  <div class="box" id="marketBox" hidden><b>ภาพรวมตลาด:</b> <span id="market"></span><div id="nextWrap" hidden><b>ที่ต้องจับตา:</b> <span id="next"></span></div></div>
+  <div class="box"><b>แผนตอนนี้:</b> <span id="plan"></span></div>
+  <div id="groups"></div>
+  <div class="foot">
+    แนวรับ/แนวต้าน = Pivot Point รายสัปดาห์จากราคาสูงสุด ต่ำสุด และปิดของสัปดาห์ล่าสุดที่จบแล้ว: P=(H+L+C)/3, R1=2P−L, S1=2P−H, R2=P+(H−L), S2=P−(H−L). ราคาจาก Yahoo Finance (ผ่าน yfinance) ข่าวและมุมมองเขียนโดย Claude จากการค้นเว็บ ข้อมูลประกอบการตัดสินใจ ไม่ใช่คำแนะนำการลงทุน
+    <div id="sources"></div>
+  </div>
+</main>
+
+<dialog id="dlg">
+  <form method="dialog">
+    <h3 style="margin-top:0">ตั้งค่าปุ่มอัปเดต</h3>
+    <p class="muted">ใส่ครั้งเดียว เก็บไว้ในเครื่องนี้เท่านั้น (ไม่ได้ส่งไปที่ไหนนอกจาก GitHub)</p>
+    <label>Repo (เช่น jimmy/my-stocks)<input id="repoIn" placeholder="owner/repo" autocomplete="off"></label>
+    <label>GitHub token (สิทธิ์ Actions: Read and write เฉพาะ repo นี้)<input id="tokIn" type="password" placeholder="github_pat_…" autocomplete="off"></label>
+    <div class="btns"><button value="save" id="saveBtn">บันทึก</button><button class="ghost" value="cancel">ยกเลิก</button></div>
+  </form>
+</dialog>
+
+<script>
+const $=id=>document.getElementById(id);
+const store={get(k){try{return localStorage.getItem(k)||""}catch(e){return""}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const GROUP_ORDER=["ชิป/AI","ยา/สุขภาพ","อื่นๆ","น้ำมัน"];
+const fmt=v=>v==null?"—":Number(v).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+function el(t,c,txt){const e=document.createElement(t);if(c)e.className=c;if(txt!=null)e.textContent=txt;return e}
+function guessRepo(){const h=location.hostname,p=location.pathname.split("/").filter(Boolean);return h.endsWith(".github.io")&&p[0]?h.split(".")[0]+"/"+p[0]:""}
+
+async function load(){
+  // Read the newest commit straight from GitHub (no waiting for Pages to rebuild); fall back to the Pages copy.
+  const{repo,tok}=cfg();
+  if(repo){
+    try{
+      const h={"Accept":"application/vnd.github.raw+json"};if(tok)h.Authorization="Bearer "+tok;
+      const r=await fetch(`https://api.github.com/repos/${repo}/contents/docs/data.json?ref=main&t=${Date.now()}`,{headers:h,cache:"no-store"});
+      if(r.ok){render(await r.json());return}
+    }catch(e){}
+  }
+  try{
+    const r=await fetch("data.json?t="+Date.now(),{cache:"no-store"});
+    if(!r.ok)throw new Error(r.status);
+    render(await r.json());
+  }catch(e){$("updated").textContent="ยังไม่มีข้อมูล กด “อัปเดตตอนนี้” ครั้งแรก";}
+}
+
+function render(d){
+  $("title").textContent=d.title||"หุ้นของฉัน";
+  const u=d.updated_at?new Date(d.updated_at):null;
+  $("updated").textContent=u?"อัปเดตล่าสุด "+u.toLocaleString("th-TH",{dateStyle:"medium",timeStyle:"short"})+(d.ai_ok===false?" · (รอบนี้ไม่มีข่าวใหม่จาก AI)":""):"";
+  $("plan").textContent=d.plan||"";
+  if(d.market){$("marketBox").hidden=false;$("market").textContent=d.market;}
+  if(d.next_events){$("nextWrap").hidden=false;$("next").textContent=d.next_events;}
+  const root=$("groups");root.textContent="";
+  const groups=[...new Set([...GROUP_ORDER,...d.stocks.map(s=>s.group)])];
+  groups.forEach(g=>{
+    const rows=d.stocks.filter(s=>s.group===g);if(!rows.length)return;
+    root.appendChild(el("h2",null,g));const grid=el("div","grid");root.appendChild(grid);
+    rows.forEach(s=>grid.appendChild(card(s)));
+  });
+  const src=$("sources");src.textContent="";
+  (d.sources||[]).forEach((s,i)=>{const a=el("a",null,s.title||s.url);a.href=s.url;a.target="_blank";a.rel="noopener";src.appendChild(document.createTextNode(i?" · ":"แหล่งข่าว: "));src.appendChild(a)});
+}
+
+function card(s){
+  const c=el("div","card"),top=el("div","top"),l=el("div"),r=el("div");
+  l.appendChild(el("div","tk",s.ticker));l.appendChild(el("div","nm",s.name));
+  const tr=s.trend==="ขึ้น"?"up":s.trend==="ลง"?"down":"flat";
+  const chips=el("div");chips.appendChild(el("span","chip "+tr,"สัปดาห์: "+(s.trend||"—")));
+  if(s.zone)chips.appendChild(el("span","chip "+(s.zone.includes("S1")&&s.zone.startsWith("ต่ำ")?"down":s.zone.startsWith("สูง")?"up":"flat"),s.zone));
+  l.appendChild(chips);
+  r.appendChild(el("div","px",fmt(s.last_close)));
+  const ch=s.day_change_pct;const pd=el("div","pd "+(ch>0?"up":ch<0?"down":""),(ch==null?"":(ch>0?"+":"")+ch.toFixed(2)+"% · ")+(s.last_date?"ปิด "+s.last_date:""));
+  r.appendChild(pd);top.appendChild(l);top.appendChild(r);c.appendChild(top);
+  const L=s.levels;
+  if(L){
+    const g=el("div","lv");[["S2","s"],["S1","s"],["P",""],["R1","r"],["R2","r"]].forEach(([k,cl])=>{const d=el("div",cl);d.appendChild(el("span",null,k));d.appendChild(el("b",null,fmt(L[k])));g.appendChild(d)});
+    c.appendChild(g);
+    if(s.last_close!=null&&L.R2>L.S2){const b=el("div","bar"),dot=el("div","dot");dot.style.left=Math.max(0,Math.min(100,(s.last_close-L.S2)/(L.R2-L.S2)*100))+"%";b.appendChild(dot);c.appendChild(b)}
+    c.appendChild(el("div","nm","แนวรับแนวต้านจากสัปดาห์ "+(s.wk_label||"")));
+  }
+  [["ข่าว",s.news,""],["มุมมอง",s.outlook,""],["ควรทำ",s.action,"act"]].forEach(([lab,txt,cl])=>{if(!txt)return;const p=el("p",cl);p.appendChild(el("span","lab",lab));p.appendChild(document.createTextNode(txt));c.appendChild(p)});
+  return c;
+}
+
+// ---- update button: GitHub Actions workflow_dispatch ----
+function cfg(){return{repo:store.get("repo")||guessRepo(),tok:store.get("tok")}}
+function say(t,c){$("status").textContent=t;$("status").className=c||""}
+async function gh(path,opt={}){const{tok}=cfg();return fetch("https://api.github.com"+path,{...opt,headers:{"Accept":"application/vnd.github+json","Authorization":"Bearer "+tok,"X-GitHub-Api-Version":"2022-11-28",...(opt.headers||{})}})}
+
+$("settings").onclick=()=>{const c=cfg();$("repoIn").value=c.repo;$("tokIn").value=c.tok;$("dlg").showModal()};
+$("dlg").addEventListener("close",()=>{if($("dlg").returnValue==="save"){store.set("repo",$("repoIn").value.trim());store.set("tok",$("tokIn").value.trim());say("บันทึกแล้ว","up")}});
+
+$("run").onclick=async()=>{
+  const{repo,tok}=cfg();
+  if(!repo||!tok){$("settings").click();return}
+  const btn=$("run");btn.disabled=true;say("กำลังสั่งอัปเดต…");
+  const startedAt=Date.now();
+  try{
+    const r=await gh(`/repos/${repo}/actions/workflows/update.yml/dispatches`,{method:"POST",body:JSON.stringify({ref:"main"})});
+    if(r.status===401||r.status===403)throw new Error("token ใช้ไม่ได้หรือไม่มีสิทธิ์ Actions (กด ⚙︎ แก้)");
+    if(r.status===404)throw new Error("ไม่พบ repo หรือไฟล์ workflow (กด ⚙︎ ตรวจชื่อ repo)");
+    if(!r.ok)throw new Error("GitHub ตอบ "+r.status);
+    say("เริ่มแล้ว กำลังดึงราคาและข่าว (ประมาณ 2–5 นาที)…");
+    for(let i=0;i<60;i++){
+      await new Promise(res=>setTimeout(res,10000));
+      const q=await gh(`/repos/${repo}/actions/workflows/update.yml/runs?per_page=1&event=workflow_dispatch`);
+      if(!q.ok)continue;
+      const run=(await q.json()).workflow_runs?.[0];
+      if(!run||new Date(run.created_at).getTime()<startedAt-60000)continue;
+      if(run.status==="completed"){
+        if(run.conclusion==="success"){say("อัปเดตเสร็จ ✓","up");load();}
+        else say("อัปเดตไม่สำเร็จ ("+run.conclusion+") ดูรายละเอียดในแท็บ Actions ของ repo","down");
+        break;
+      }
+      say("กำลังทำงาน… ("+Math.round((Date.now()-startedAt)/1000)+" วินาที)");
+    }
+  }catch(e){say(e.message,"down")}
+  btn.disabled=false;
+};
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "title": "หุ้นของ Jimmy",
+  "plan": "ถือหุ้นชิป ไม่ขายตอนตลาดกลัว · NVDA ไม้ 1 ซื้อแล้ว $150 (6 พ.ย.) ไม้ 2 รอหลังงบ 17 พ.ย. ไม้ 3 ใช้เมื่อ Nasdaq ลงต่ออีก ~5% · เงินรายเดือนเติมกลุ่มนอกชิป (LLY, COST) จนชิปเหลือ ~45–50% ของพอร์ต · หุ้นน้ำมันเล่นรอบสั้น ตัดขาดทุนที่ −10% จากราคาที่ซื้อ",
+  "investor_profile": "นักลงทุนระยะยาว รับความเสี่ยงสูงได้ในช่วง 15 ปีแรก เป้าหมาย 5-10 ล้านใน 20 ปี ไม่อยากถือ ETF ชอบหุ้นรายตัว สนใจหุ้นยา/สุขภาพนอกธีม AI",
+  "holdings": [
+    {"ticker": "ASML", "name": "ASML Holding", "group": "ชิป/AI"},
+    {"ticker": "AMD", "name": "Advanced Micro Devices", "group": "ชิป/AI"},
+    {"ticker": "NVDA", "name": "NVIDIA", "group": "ชิป/AI"},
+    {"ticker": "ASX", "name": "ASE Technology", "group": "ชิป/AI"},
+    {"ticker": "LLY", "name": "Eli Lilly", "group": "ยา/สุขภาพ"},
+    {"ticker": "TVTX", "name": "Travere Therapeutics", "group": "ยา/สุขภาพ"},
+    {"ticker": "COST", "name": "Costco", "group": "อื่นๆ"},
+    {"ticker": "SPCK", "name": "SPAC and New Issue ETF", "group": "อื่นๆ"},
+    {"ticker": "VLO", "name": "Valero Energy", "group": "น้ำมัน"},
+    {"ticker": "FRO", "name": "Frontline", "group": "น้ำมัน"}
+  ],
+  "model": "claude-sonnet-5-5",
+  "max_searches": 8
+}
